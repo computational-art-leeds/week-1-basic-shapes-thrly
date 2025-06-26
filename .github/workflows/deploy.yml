@@ -1,0 +1,52 @@
+name: Deploy COMP-ART Project to GitHub Pages
+
+# This workflow automatically deploys your p5.js project to GitHub Pages
+# whenever you push changes to your sketch.js file
+on:
+  push:
+    branches: [main, master]
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  # Build job - packages your p5.js project for deployment
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout your code
+        uses: actions/checkout@v4
+
+      - name: Setup GitHub Pages
+        uses: actions/configure-pages@v4
+        with:
+          enablement: true
+
+      - name: Upload your p5.js project
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Upload entire repository (includes index.html, sketch.js, p5.js, etc.)
+          path: "."
+
+  # Deployment job - publishes your project to GitHub Pages
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy your project to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
